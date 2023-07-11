@@ -1,0 +1,7 @@
+{
+    "name": "embeddings-44c73c23.parquet",
+    "format": "parquet",
+    "date": "2023-07-11",
+    "description": "Related to styles-44c73c23. Removed subCategories with less than 10 occurrences.",
+    "dev": "zeinovich"
+}
