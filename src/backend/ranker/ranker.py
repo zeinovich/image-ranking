@@ -1,14 +1,7 @@
-import mlflow
+import pickle
 import numpy as np
 import os
 import logging
-
-REGISTRY_URI = 'file:///home/zeinovich/projects/image-ranking/mlflow'
-STAGE = 'Staging'
-MODEL_PATH = f'models:/Ranker/{STAGE}'
-PATH = os.path.dirname(os.path.abspath(__file__))
-
-mlflow.set_registry_uri(REGISTRY_URI)
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -18,20 +11,17 @@ logging.basicConfig(level=logging.INFO,
 
 logger = logging.getLogger(__name__)
 
-
-logger.info(f'{REGISTRY_URI=}')
-logger.info(f'{STAGE=}')
-logger.info(f'{MODEL_PATH=}')
-
-
 class Ranker():
     def __init__(self,
                  model_path: str,
                  K: int=5):
         
-        self.model = mlflow.sklearn.load_model(model_path,
-                                               dst_path='../tmp/ranker')
+        with open(model_path, 'rb') as model:
+            self.model = pickle.load(model)
+
         self.K = K
+        logger.info(f"Ranker initialized from {model_path}")
+        logger.info(f'RANKER={self.model}')
 
     def rank(self, query: np.ndarray) -> np.ndarray:
         _, indices = self.model.kneighbors(query, n_neighbors=self.K)
