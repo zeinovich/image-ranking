@@ -13,7 +13,7 @@ mlflow.set_registry_uri(REGISTRY_URI)
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
-                    handlers=[logging.FileHandler(f"{PATH}/../../../logs/ranker.log"),
+                    handlers=[logging.FileHandler("../logs/ranker.log"),
                                 logging.StreamHandler()])
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ class Ranker():
                  K: int=5):
         
         self.model = mlflow.sklearn.load_model(model_path,
-                                               dst_path=f'{PATH}/../../../tmp/ranker')
+                                               dst_path='../tmp/ranker')
         self.K = K
 
     def rank(self, query: np.ndarray) -> np.ndarray:

@@ -13,7 +13,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
-                    handlers=[logging.FileHandler(f"{PATH}/../../../logs/extractor.log"),
+                    handlers=[logging.FileHandler("../logs/extractor.log"),
                                 logging.StreamHandler()])
 
 
@@ -33,15 +33,30 @@ class FeatureExtractor():
         
         self.device = device
         self.model = mlflow.pytorch.load_model(model_path,
-                                               dst_path=f'{PATH}/../../../tmp/extractor').to(self.device)
+                                               dst_path='../tmp/extractor').to(self.device)
         self.transform = Compose([ToTensor()])
         self.model.eval()
 
     @no_grad()
     def extract(self, image):
         image = self.transform(image).unsqueeze(0).to(self.device)
-        return self.model(image).cpu().numpy().flatten()
+        return self.model(image).cpu().numpy().flatten().reshape(-1)
 
     def _get_output_shape(self, image_dim=(1, 3, 100, 100)):
-        return self.model(rand(*(image_dim))).data.shape
+        out = self.model(rand(*(image_dim))).data
+        out = out.cpu().numpy().flatten().reshape(-1)
+        return out.shape
+    
+    @property
+    def output_shape(self):
+        return self._get_output_shape()
+    
+    def __call__(self, image):
+        return self.extract(image)
+    
+    def __repr__(self):
+        return f'FeatureExtractor(model_path={MODEL_PATH})'
+    
+    def __str__(self):
+        return self.__repr__()
 
