@@ -3,3 +3,8 @@ ILSVRC2012_img_val.tar
 *.pkl
 mlflow
 .ipynb_checkpoints
+.pyc
+__pycache__
+tmp
+logs
+*.log
