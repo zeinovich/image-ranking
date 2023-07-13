@@ -1,21 +1,22 @@
 import pickle
 import numpy as np
-import os
+# import os
 import logging
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     handlers=[logging.FileHandler("../logs/ranker.log"),
-                                logging.StreamHandler()])
+                              logging.StreamHandler()])
 
 logger = logging.getLogger(__name__)
+
 
 class Ranker():
     def __init__(self,
                  model_path: str,
-                 K: int=5):
-        
+                 K: int = 5):
+
         with open(model_path, 'rb') as model:
             self.model = pickle.load(model)
 

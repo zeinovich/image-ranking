@@ -2,23 +2,25 @@ import torch
 # import torch.nn as nn
 from torchvision.transforms import Compose, ToTensor
 import numpy as np
-import os
+# import os
 import logging
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     handlers=[logging.FileHandler("../logs/extractor.log"),
-                                logging.StreamHandler()])
+                              logging.StreamHandler()])
 
 
 logger = logging.getLogger(__name__)
+
+
 class FeatureExtractor():
     def __init__(self,
                  model_path: str,
-                 scaler=None, 
-                 device: str='cpu'):
-        
+                 scaler=None,
+                 device: str = 'cpu'):
+
         '''
         model_path: path to the model
         scaler: scaler to be used to scale the output of the model
@@ -42,10 +44,9 @@ class FeatureExtractor():
         '''
         Extract features from the image
         image: image to be extracted
-        
+
         returns: features of the image
         '''
-
 
         image = self._transform(image).unsqueeze(0).to(self._device)
         logger.info(f'Extracting features from image of shape {image.shape}')
@@ -56,7 +57,7 @@ class FeatureExtractor():
         if self._scaler is not None:
             out = self._scaler.transform(out)
             logger.info(f'Scaled features of shape {out.shape}')
-        
+
         return out.reshape(-1)
 
     def _get_output_shape(self, image_dim=(1, 3, 100, 100)):
@@ -68,7 +69,7 @@ class FeatureExtractor():
         out = self._model(torch.rand(*(image_dim))).data
         out = out.cpu().numpy().flatten().reshape(-1)
         return out.shape
-    
+
     @property
     def output_shape(self):
         '''
@@ -76,7 +77,6 @@ class FeatureExtractor():
         '''
 
         return self._get_output_shape()
-    
 
     def set_scaler(self, scaler):
         '''
@@ -89,22 +89,22 @@ class FeatureExtractor():
         try:
             test_input = np.random.rand(1, self.output_shape[0])
             test_output = self._scaler.transform(test_input)
-            assert test_input.shape == test_output.shape, f'Scaler {self._scaler} is not working properly'
+
+            assert test_input.shape == test_output.shape,\
+                   f'Scaler {self._scaler} is not working properly'
 
         except Exception as e:
             logger.exception(e)
             self._scaler = None
-            logger.info(f'Scaler set to None')
+            logger.info('Scaler set to None')
 
         logger.info(f'Scaler set to {self._scaler}')
-        
 
     def __call__(self, image):
         return self.extract(image)
-    
+
     def __repr__(self):
         return f'FeatureExtractor(model={self.model}, device={self.device})'
-    
+
     def __str__(self):
         return self.__repr__()
-
