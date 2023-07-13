@@ -4,6 +4,7 @@ from PIL import Image
 from urllib.request import urlopen
 import pytest
 import numpy as np
+import pickle
 
 # test feature extractor
 @pytest.fixture
@@ -12,14 +13,25 @@ def extractor():
                             device='cpu')
 
 
-def test_feature_extractor(extractor):
+def test_feature_extractor(extractor: FeatureExtractor):
     url = 'http://assets.myntassets.com/v1/images/style/properties/504a27acee8e6d89d7eec2fae5b5ef01_images.jpg'
     image = Image.open(urlopen(url))
     assert extractor.extract(image).shape == extractor.output_shape
 
+def test_feature_extractor_with_scaler(extractor: FeatureExtractor):
+    url = 'http://assets.myntassets.com/v1/images/style/properties/504a27acee8e6d89d7eec2fae5b5ef01_images.jpg'
+    image = Image.open(urlopen(url))
+    
+    with open('backend/ML-models/scaler.pkl', 'rb') as scaler:
+        extractor.set_scaler(pickle.load(scaler))
+
+    assert extractor.extract(image).shape == extractor.output_shape
+
+
+
+
 
 # test ranker
-
 @pytest.fixture
 def ranker():
     return Ranker(model_path='backend/ML-models/ranker.pkl')

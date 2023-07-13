@@ -25,16 +25,16 @@ class FeatureExtractor():
         device: device to be used for the model
         '''
 
-        self.device = device
-        self.model = torch.load(model_path, map_location=self.device)
-        self.transform = Compose([ToTensor()])
-        self.scaler = scaler
-        self.model.eval()
+        self._device = device
+        self._model = torch.load(model_path, map_location=self._device)
+        self._transform = Compose([ToTensor()])
+        self._scaler = scaler
+        self._model.eval()
 
         logger.info(f'Loaded model from {model_path}')
-        logger.info(f'Using device {self.device}')
-        logger.info(f'Using scaler {self.scaler}')
-        logger.info(f'Using transform {self.transform}')
+        logger.info(f'Using device {self._device}')
+        logger.info(f'Using scaler {self._scaler}')
+        logger.info(f'Using transform {self._transform}')
 
     @torch.no_grad()
     def extract(self, image):
@@ -46,17 +46,18 @@ class FeatureExtractor():
         returns: features of the image
         '''
 
-        image = self.transform(image).unsqueeze(0).to(self.device)
+
+        image = self._transform(image).unsqueeze(0).to(self._device)
         logger.info(f'Extracting features from image of shape {image.shape}')
 
-        out = self.model(image).cpu().numpy().flatten().reshape(-1)
+        out = self._model(image).cpu().numpy().flatten().reshape(1, -1)
         logger.info(f'Extracted features of shape {out.shape}')
 
-        if self.scaler is not None:
-            out = self.scaler.transform(out)
+        if self._scaler is not None:
+            out = self._scaler.transform(out)
             logger.info(f'Scaled features of shape {out.shape}')
         
-        return out
+        return out.reshape(-1)
 
     def _get_output_shape(self, image_dim=(1, 3, 100, 100)):
 
@@ -64,7 +65,7 @@ class FeatureExtractor():
         Get the output shape of the model
         '''
 
-        out = self.model(torch.rand(*(image_dim))).data
+        out = self._model(torch.rand(*(image_dim))).data
         out = out.cpu().numpy().flatten().reshape(-1)
         return out.shape
     
@@ -76,6 +77,28 @@ class FeatureExtractor():
 
         return self._get_output_shape()
     
+
+    def set_scaler(self, scaler):
+        '''
+        Set the scaler to be used for scaling the output of the model
+        '''
+
+        self._scaler = scaler
+
+        # test the scaler
+        try:
+            test_input = np.random.rand(1, self.output_shape[0])
+            test_output = self._scaler.transform(test_input)
+            assert test_input.shape == test_output.shape, f'Scaler {self._scaler} is not working properly'
+
+        except Exception as e:
+            logger.exception(e)
+            self._scaler = None
+            logger.info(f'Scaler set to None')
+
+        logger.info(f'Scaler set to {self._scaler}')
+        
+
     def __call__(self, image):
         return self.extract(image)
     
