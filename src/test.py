@@ -1,14 +1,16 @@
 from backend.feature_extractor.extractor import FeatureExtractor
 from backend.ranker.ranker import Ranker
 from PIL import Image
+from io import BytesIO
+import requests
 from urllib.request import urlopen
 import pytest
 import numpy as np
 import pickle
 
-FEATURE_EXTRACTOR_PATH = 'backend/ML-models/feature_extractor.pkl'
-RANKER_PATH = 'backend/ML-models/ranker.pkl'
-SCALER_PATH = 'backend/ML-models/scaler.pkl'
+FEATURE_EXTRACTOR_PATH = './backend/ML-models/feature-extractor.pth'
+RANKER_PATH = './backend/ML-models/ranker.pkl'
+SCALER_PATH = './backend/ML-models/scaler.pkl'
 TEST_IMAGE_URL = 'http://assets.myntassets.com/v1/images/style/\
 properties/504a27acee8e6d89d7eec2fae5b5ef01_images.jpg'
 
@@ -45,3 +47,20 @@ def ranker():
 def test_ranker(ranker, extractor):
     query = np.random.rand(1, extractor.output_shape[0])
     assert ranker.rank(query).shape == (5,)
+
+
+# test backend
+def test_health():
+    response = requests.get('http://localhost:8888/api/v1.0/health')
+    assert response.status_code == 200
+
+
+def test_backend():
+    image = Image.open(urlopen(TEST_IMAGE_URL))
+    image = BytesIO(image.tobytes())
+
+    # [TODO] change this to the actual url in docker network
+    response = requests.post('http://localhost:8888/api/v1.0/predict',
+                             files={'image': image})
+
+    assert response.status_code == 200
