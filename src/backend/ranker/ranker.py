@@ -21,8 +21,11 @@ class Ranker():
 
         self.K = K
         logger.info(f"Ranker initialized from {model_path}")
+        logger.info(f"{K=}")
         logger.info(f'RANKER={self.model}')
 
     def rank(self, query: np.ndarray) -> np.ndarray:
         _, indices = self.model.kneighbors(query, n_neighbors=self.K)
+        logger.info(f"query={query} => indices={indices}")
+
         return indices.reshape(-1)
