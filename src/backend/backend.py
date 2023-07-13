@@ -2,12 +2,13 @@ from flask import Flask, request, jsonify
 from PIL import Image
 from feature_extractor.extractor import FeatureExtractor
 from ranker.ranker import Ranker
+from io import BytesIO, StringIO
 import pickle
 import logging
+import base64
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    filename='../logs/backend.log',
                     handlers=[logging.FileHandler('../logs/backend.log'),
                               logging.StreamHandler()])
 
@@ -30,7 +31,6 @@ except Exception as e:
     logger.info('Setting scaler to None')
     scaler = None
 
-
 try:
     feature_extractor = FeatureExtractor(FEATURE_EXTRACTOR_PATH,
                                          scaler=scaler)
@@ -45,19 +45,23 @@ app = Flask(__name__)
 
 @app.route('/api/v1.0/predict', methods=['POST'])
 def predict():
+
+    logger.info('Got request')
+    
     try:
-        data = request.get_json(force=True)
-        logger.info(f'Got request: {data}')
-        image = data['files']['image']
+        data = request.get_json()
+        logger.info(f'Got JSON: {type(data)}')
+
+        image = data['image']
         logger.info(f'Got image: {type(image)}')
 
-        image = Image.open(image)
+        image = Image.open(BytesIO(base64.b64decode(image)))
         logger.info(f'Opened image: {type(image)} of size: {image.size}')
 
         features = feature_extractor.extract(image)
         logger.info(f'Extracted features: {features.shape}')
 
-        predictions = ranker.predict(features)
+        predictions = ranker.rank(features).tolist()
         logger.info(f'Predictions: {predictions}')
 
         return jsonify({'predictions': predictions,
