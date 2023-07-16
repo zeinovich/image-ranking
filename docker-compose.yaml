@@ -4,7 +4,7 @@ services:
     container_name: postgres
     image: postgres:latest
     env_file: 
-      - db/db.env
+      - db.env
     volumes:
       - postgres_db:/var/lib/postgresql/data
     ports:
@@ -28,7 +28,7 @@ services:
     container_name: pgadmin
     image: dpage/pgadmin4:7.2
     env_file: 
-      - db/pgadmin.env
+      - pgadmin.env
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:
@@ -41,6 +41,25 @@ services:
           memory: 256M
     networks:
       - image-ranking
+
+  backend:
+    container_name: backend
+    build: src/backend
+    command: python src/db_init.py # copy init_file to backend
+    env_file:
+      - db.env  
+    networks:
+      - image-ranking
+    ports:
+      - "8888:8888"
+    
+  frontend:
+    container_name: frontend
+    build: src/frontend
+    networks:
+      - image-ranking
+    ports:
+      - "80:8501"
 
 volumes:
   postgres_db:
