@@ -131,7 +131,7 @@ def predict():
 
 @app.route('/api/v1.0/health', methods=['GET'])
 def health():
-    return jsonify({'status': 0})
+    return jsonify({'status': 200})
 
 
 if __name__ == '__main__':
