@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO,
                               logging.StreamHandler()])
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('extractor')
 
 
 class FeatureExtractor():
