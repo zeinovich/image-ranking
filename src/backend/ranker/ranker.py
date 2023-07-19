@@ -29,7 +29,7 @@ class Ranker():
         logger.info(f"query.shape={query.shape}")
         query = query.reshape(1, -1)
 
-        _, indices = self.model.kneighbors(query, n_neighbors=self.K)
+        distances, indices = self.model.kneighbors(query, n_neighbors=self.K)
         logger.info(f"query={query} => indices={indices}")
 
-        return indices.reshape(-1)
+        return distances.reshape(-1), indices.reshape(-1)

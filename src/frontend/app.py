@@ -11,9 +11,12 @@ logging.basicConfig(level=logging.INFO,
 
 logger = logging.getLogger(__name__)
 
+WIDTH = 360
+
 
 def predict(img_file):
-    st.write('Classifying...')
+    placeholder = st.empty()
+    placeholder.write('Classifying...')
 
     im_bytes = img_file.getvalue()
     im_b64 = base64.b64encode(im_bytes).decode("utf8")
@@ -23,17 +26,13 @@ def predict(img_file):
     response = requests.post('http://localhost:8888/api/v1.0/predict',
                              data=payload, headers=headers)
 
+    placeholder.empty()
     if response.status_code == 200:
         predictions = response.json()['predictions']
-
-        st.write('Predictions:')
-        for prediction in predictions:
-            url = prediction['default']
-            st.image(url, use_column_width=True)
+        return predictions
 
     else:
         st.write('Error in classification')
-
 
 st.write('Test')
 
@@ -41,9 +40,23 @@ img_file = st.file_uploader('Upload file', type=['png', 'jpg', 'jpeg'])
 
 if img_file is not None:
 
+    predictions = None
     logger.info(f'Got image: {type(img_file)}')
-    st.image(img_file, caption='Uploaded Image', use_column_width=True)
+    st.image(img_file, width=WIDTH)
     st.write('')
 
-    if st.button('Classify'):
-        predict(img_file)
+    if st.button('***Find similar***'):
+        predictions = predict(img_file)
+
+    
+    if predictions is not None:
+        for pred in predictions:
+            st.subheader(f"({pred['index']}) {pred['productdisplayname']}")
+            col1, col2 = st.columns(2)
+            col1.image(pred['default'])
+            col2._html(pred['productdescriptors'], 
+                       scrolling=True,
+                       height=450)
+            st.write('')
+
+        

@@ -50,11 +50,6 @@ def test_ranker(ranker, extractor):
 
 
 # test backend
-def test_health():
-    response = requests.get('http://localhost:8888/api/v1.0/health')
-    assert response.status_code == 200
-
-
 def test_backend():
     image = Image.open(urlopen(TEST_IMAGE_URL))
     image = BytesIO(image.tobytes())

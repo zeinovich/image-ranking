@@ -17,7 +17,6 @@ def read_data(path: str) -> pd.DataFrame:
 
     return df
 
-
 engine = create_engine(f'postgresql://{USER}:{PASSWORD}@localhost:5432/{DB}')
 
 df = read_data(DATA_PATH)

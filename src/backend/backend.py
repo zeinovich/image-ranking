@@ -77,18 +77,27 @@ def get_predictions(data: dict) -> list:
     features = feature_extractor.extract(image)
     logger.info(f'Extracted features: {features.shape}')
 
-    predictions = ranker.rank(features).tolist()
+    predictions = ranker.rank(features)
+    distances, ids = (predictions[0].tolist(), 
+                      predictions[1].tolist())
+    
     logger.info(f'Predictions: {predictions}')
 
-    return predictions
+    return distances, ids
 
 
-def get_info_from_db(ids: list):
-    ids = tuple(ids)
+def get_info_from_db(predictions: list):
+    distances = predictions[0]
+    ids = tuple(predictions[1])
+
+    ids_dist = pd.DataFrame(data=[ids, distances]).T
+    ids_dist.columns = ['id', 'distance']
+    
     logger.info(f'Got ids: {ids}')
+    logger.info(f'Got ids_dist: {ids_dist}')
 
     query = f"""
-    SELECT t.default, t.search, t.back, t.front, t.left, t.right, t.top
+    SELECT *
     FROM styles_v1 as t
     WHERE index IN {ids}
     """
@@ -98,9 +107,19 @@ def get_info_from_db(ids: list):
     try:
         df = pd.read_sql(query, engine)
         logger.info(f'Got df: {df.shape}')
+        df = (pd.merge(left=df,
+                      right=ids_dist,
+                      how='left',
+                      left_on='index',
+                      right_on='id')
+                      .sort_values('distance',
+                                    ascending=True)
+                      .reset_index(drop=True))
+        
+        logger.info(f'Sorted {df.distance}')
 
         predictions = df.to_dict(orient='records')
-        logger.info(f'Got predictions: {len(predictions)}')
+        logger.info(f'Got predictions: {[pred["index"] for pred in predictions]}')
 
         return predictions
 
@@ -117,8 +136,8 @@ def predict():
         data = request.get_json()
         logger.info(f'Got JSON: {type(data)}')
 
-        prediction_ids = get_predictions(data)
-        predictions_urls = get_info_from_db(prediction_ids)
+        prediction = get_predictions(data)
+        predictions_urls = get_info_from_db(prediction)
 
         return jsonify({'predictions': predictions_urls,
                         'status_code': 200})
