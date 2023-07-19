@@ -1,7 +1,0 @@
-{
-	"name": "embeddings-efe5f026",
-	"format": "parquet",
-	"date": "2023-07-09",
-	"description": "Image Features from EfficientNet-v2-S, generated from ALL images (Consider dropping test set). Each image consists of 1280 features. Features are drawn from AvgPool",
-	"dev": "zeinovich"
-}

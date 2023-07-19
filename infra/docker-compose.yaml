@@ -42,28 +42,31 @@ services:
     networks:
       - image-ranking
 
-  backend:
-    container_name: backend
-    build: src/backend
-    command: python src/db_init.py # copy init_file to backend
-    env_file:
-      - db.env  
-    networks:
-      - image-ranking
-    ports:
-      - "8888:8888"
+  # backend:
+  #   container_name: backend
+  #   build: src/backend
+  #   command: python src/db_init.py # copy init_file to backend
+  #   env_file:
+  #     - db.env  
+  #   networks:
+  #     - image-ranking
+  #   ports:
+  #     - "8888:8888"
     
-  frontend:
-    container_name: frontend
-    build: src/frontend
-    networks:
-      - image-ranking
-    ports:
-      - "80:8501"
+  # frontend:
+  #   container_name: frontend
+  #   build: src/frontend
+  #   networks:
+  #     - image-ranking
+  #   ports:
+  #     - "80:8501"
 
 volumes:
   postgres_db:
+    external: true
   pgadmin_data:
+    external: true
 
 networks:
   image-ranking:
+    external: true

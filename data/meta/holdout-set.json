@@ -1,7 +1,0 @@
-{
-    "name": "holdout_ids.csv",
-    "format": "csv",
-    "date": "2023-07-11",
-    "description": "Holdout set. Contains 8884 ids",
-    "dev": "zeinovich"
-}

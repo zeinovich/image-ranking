@@ -1,7 +1,0 @@
-{
-    "name": "styles-668955cf",
-    "format": "pickle",
-    "date": "2023-07-08",
-    "description": " Initial processing of dataset info. Concatenated all .json into pickle file. Removed all unnesessary information, like scraped meta",
-    "dev": "zeinovich"
-}

@@ -1,7 +1,0 @@
-{
-    "name": "styles-668955cf,pkl",
-    "format": "pickle",
-    "date": "2023-07-11",
-    "description": "Removed ids that didn't have embeddings. Removed subCategories with less than 10 occurrences",
-    "dev": "zeinovich"
-}
