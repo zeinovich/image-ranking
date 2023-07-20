@@ -1,3 +1,5 @@
+!db_example.env
+!data_folder.py
 *.parquet
 mlflow
 .ipynb_checkpoints
@@ -5,9 +7,10 @@ mlflow
 __pycache__
 tmp
 logs
-*.log
-data
 ML-models
+*.log
 *.env
 *.pth
 *.pkl
+*.csv
+*.json

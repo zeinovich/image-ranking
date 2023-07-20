@@ -11,19 +11,19 @@ import base64
 from dotenv import load_dotenv
 from os import getenv
 
-load_dotenv("../db.env")
+load_dotenv("./backend/backend.env")
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
-    handlers=[logging.FileHandler("../logs/backend.log"), logging.StreamHandler()],
+    handlers=[logging.FileHandler("./logs/backend.log"), logging.StreamHandler()],
 )
 
 logger = logging.getLogger("backend")
 
-FEATURE_EXTRACTOR_PATH = "./backend/ML-models/feature-extractor.pth"
-RANKER_PATH = "./backend/ML-models/ranker.pkl"
-SCALER_PATH = "./backend/ML-models/scaler.pkl"
+FEATURE_EXTRACTOR_PATH = getenv("FEATURE_EXTRACTOR_PATH")
+RANKER_PATH = getenv("RANKER_PATH")
+SCALER_PATH = getenv("SCALER_PATH")
 
 USER = getenv("POSTGRES_USER")
 PASSWORD = getenv("POSTGRES_PASSWORD")
@@ -56,7 +56,7 @@ except Exception as e:
     raise e
 
 try:
-    connection = f"postgresql://{USER}:{PASSWORD}@localhost:5432/{DB}"
+    connection = f"postgresql://{USER}:{PASSWORD}@postgres:5432/{DB}"
     engine = create_engine(connection)
     logger.info("Connected to DB")
 
