@@ -11,7 +11,7 @@ import base64
 from dotenv import load_dotenv
 from os import getenv
 
-load_dotenv("./backend/backend.env")
+load_dotenv("./backend.env")
 
 logging.basicConfig(
     level=logging.INFO,

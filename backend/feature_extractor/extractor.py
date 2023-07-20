@@ -1,10 +1,7 @@
 import torch
-
-# import torch.nn as nn
 from torchvision.transforms import Compose, ToTensor
 import numpy as np
 
-# import os
 import logging
 
 logging.basicConfig(
