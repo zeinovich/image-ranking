@@ -25,7 +25,7 @@ def predict(img_file):
     headers = {"Content-type": "application/json", "Accept": "text/plain"}
     payload = json.dumps({"image": im_b64})
     response = requests.post(
-        "http://localhost:8888/api/v1.0/predict", data=payload, headers=headers
+        "http://backend:8888/api/v1.0/predict", data=payload, headers=headers
     )
 
     placeholder.empty()

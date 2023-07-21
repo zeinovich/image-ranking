@@ -3,7 +3,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from os import getenv
 
-load_dotenv("../db.env")
+load_dotenv("./db.env")
 
 USER = getenv("POSTGRES_USER")
 PASSWORD = getenv("POSTGRES_PASSWORD")

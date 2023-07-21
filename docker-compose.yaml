@@ -4,11 +4,11 @@ services:
     container_name: postgres
     image: postgres:latest
     env_file: 
-      - db.env
+      - ./db/db.env
     volumes:
       - postgres_db:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - 5432:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d image-ranking-db -U zeinovich"]
       interval: 10s
@@ -28,12 +28,16 @@ services:
     container_name: pgadmin
     image: dpage/pgadmin4:7.2
     env_file: 
-      - pgadmin.env
+      - ./db/pgadmin.env
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:
-      - "5050:80"
+      - 5050:5050
     restart: unless-stopped
+    depends_on:
+      - postgres
+    links:
+      - postgres
     deploy:
       resources:
         limits:
@@ -42,24 +46,35 @@ services:
     networks:
       - image-ranking
 
-  # backend:
-  #   container_name: backend
-  #   build: src/backend
-  #   command: python src/db_init.py # copy init_file to backend
-  #   env_file:
-  #     - db.env  
-  #   networks:
-  #     - image-ranking
-  #   ports:
-  #     - "8888:8888"
+  backend:
+    container_name: backend
+    build:
+      dockerfile: ./Dockerfile
+      context: ./backend
+    env_file:
+      - backend/backend.env
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    networks:
+      - image-ranking
+    ports:
+      - 8888:8888
     
-  # frontend:
-  #   container_name: frontend
-  #   build: src/frontend
-  #   networks:
-  #     - image-ranking
-  #   ports:
-  #     - "80:8501"
+  frontend:
+    container_name: frontend
+    build:
+      dockerfile: ./Dockerfile
+      context: ./frontend
+    depends_on:
+      - backend
+    links:
+      - backend
+    networks:
+      - image-ranking
+    ports:
+      - 8501:8501
 
 volumes:
   postgres_db:
