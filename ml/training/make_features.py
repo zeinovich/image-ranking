@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from PIL import Image
 from tqdm import tqdm
@@ -9,7 +8,6 @@ import requests
 import argparse
 
 import torch
-import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms as T
 
