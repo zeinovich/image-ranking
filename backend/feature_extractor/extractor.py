@@ -102,7 +102,7 @@ class FeatureExtractor:
         return self.extract(image)
 
     def __repr__(self):
-        return f"FeatureExtractor(model={self.model}, device={self.device})"
+        return f"FeatureExtractor(model={self._model}, device={self._device})"
 
     def __str__(self):
         return self.__repr__()

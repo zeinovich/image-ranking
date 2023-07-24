@@ -18,8 +18,8 @@ import base64
 from dotenv import load_dotenv
 from os import getenv
 
-from feature_extractor.extractor import FeatureExtractor
-from ranker.ranker import Ranker
+from .feature_extractor.extractor import FeatureExtractor
+from .ranker.ranker import Ranker
 
 load_dotenv("./backend.env")
 
@@ -43,9 +43,9 @@ logger.info(f"{FEATURE_EXTRACTOR_PATH=}")
 logger.info(f"{RANKER_PATH=}")
 logger.info(f"{SCALER_PATH=}")
 
-assert USER is not None, "Got None db username"
-assert PASSWORD is not None, "Got None db password"
-assert DB is not None, "Got None db name"
+logger.info(f"{USER=}")
+logger.info(f"{PASSWORD=}")
+logger.info(f"{DB=}")
 
 logger.info("Successfully loaded environment")
 try:
