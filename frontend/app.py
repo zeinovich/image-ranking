@@ -1,3 +1,13 @@
+"""
+App for the frontend
+
+This app is a Streamlit app that allows the user to upload an image and
+find similar images in the database.
+
+Usage:
+    streamlit run app.py
+"""
+
 import streamlit as st
 import requests
 import base64

@@ -1,15 +1,25 @@
+"""
+Flask app for serving predictions
+
+Usage:
+    python backend.py
+    gunicorn backend:app
+"""
+
 from flask import Flask, request, jsonify
-from PIL import Image
-from feature_extractor.extractor import FeatureExtractor
-from ranker.ranker import Ranker
-from io import BytesIO
 from sqlalchemy import create_engine
+from PIL import Image
+
+from io import BytesIO
 import pandas as pd
 import pickle
 import logging
 import base64
 from dotenv import load_dotenv
 from os import getenv
+
+from feature_extractor.extractor import FeatureExtractor
+from ranker.ranker import Ranker
 
 load_dotenv("./backend.env")
 

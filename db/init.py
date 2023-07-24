@@ -1,3 +1,10 @@
+"""
+Script to initialize the database with the data from the data folder.
+
+Usage:
+    python -m db.init
+"""
+
 from sqlalchemy import create_engine
 import pandas as pd
 from dotenv import load_dotenv
