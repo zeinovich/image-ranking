@@ -26,7 +26,10 @@ load_dotenv("./backend.env")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
-    handlers=[logging.FileHandler("./logs/backend.log"), logging.StreamHandler()],
+    handlers=[
+        logging.FileHandler("./logs/backend.log"),
+        logging.StreamHandler(),
+    ],
 )
 
 logger = logging.getLogger("backend")
@@ -62,7 +65,7 @@ try:
     ranker = Ranker(RANKER_PATH)
 
 except Exception as e:
-    logger.error(f"Error loading model: {e}")
+    logger.error(f"Error loading models: {e}")
     raise e
 
 try:
@@ -77,33 +80,35 @@ except Exception as e:
 app = Flask(__name__)
 
 
-def get_predictions(data: dict) -> list:
+def load_image_from_json(data: dict) -> Image:
     image = data["image"]
     logger.info(f"Got image: {type(image)}")
 
     image = Image.open(BytesIO(base64.b64decode(image)))
+    return image
+
+
+def get_predictions(
+    image: Image, feature_extractor: FeatureExtractor, ranker: Ranker
+) -> list:
+
     logger.info(f"Opened image: {type(image)} of size: {image.size}")
 
     features = feature_extractor.extract(image)
     logger.info(f"Extracted features: {features.shape}")
 
-    predictions = ranker.rank(features)
-    distances, ids = (predictions[0].tolist(), predictions[1].tolist())
+    distances, ids = ranker.rank(features)
+    logger.info(f"Predictions: {distances.shape}, {ids.shape}")
 
-    logger.info(f"Predictions: {predictions}")
-
-    return distances, ids
+    return (distances.tolist(), ids.tolist())
 
 
-def get_info_from_db(predictions: list):
-    distances = predictions[0]
-    ids = tuple(predictions[1])
-
-    ids_dist = pd.DataFrame(data=[ids, distances]).T
-    ids_dist.columns = ["id", "distance"]
+def get_info_from_db(distances: list, ids: list) -> dict:
+    sorted_ids = pd.DataFrame(data=[ids, distances]).T
+    sorted_ids.columns = ["id", "distance"]
 
     logger.info(f"Got ids: {ids}")
-    logger.info(f"Got ids_dist: {ids_dist}")
+    logger.info(f"Got ids_dist: {sorted_ids}")
 
     query = f"""
     SELECT *
@@ -118,16 +123,20 @@ def get_info_from_db(predictions: list):
         logger.info(f"Got df: {df.shape}")
         df = (
             pd.merge(
-                left=df, right=ids_dist, how="left", left_on="index", right_on="id"
+                left=df,
+                right=sorted_ids,
+                how="left",
+                left_on="index",
+                right_on="id",
             )
             .sort_values("distance", ascending=True)
             .reset_index(drop=True)
         )
 
-        logger.info(f"Sorted {df.distance}")
-
         predictions = df.to_dict(orient="records")
-        logger.info(f'Got predictions: {[pred["index"] for pred in predictions]}')
+        logger.info(
+            f'Got predictions: {[pred["index"] for pred in predictions]}'
+        )
 
         return predictions
 
@@ -144,8 +153,14 @@ def predict():
         data = request.get_json()
         logger.info(f"Got JSON: {type(data)}")
 
-        prediction = get_predictions(data)
-        predictions_urls = get_info_from_db(prediction)
+        image = load_image_from_json(data)
+        distances, ids = get_predictions(image, feature_extractor, ranker)
+        predictions_urls = get_info_from_db(distances, ids)
+
+        if predictions_urls is None:
+            return jsonify(
+                {"error": "No predictions found", "status_code": 404}
+            )
 
         return jsonify({"predictions": predictions_urls, "status_code": 200})
 

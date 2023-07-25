@@ -8,7 +8,10 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[logging.FileHandler("./logs/extractor.log"), logging.StreamHandler()],
+    handlers=[
+        logging.FileHandler("./logs/extractor.log"),
+        logging.StreamHandler(),
+    ],
 )
 
 
@@ -16,7 +19,49 @@ logger = logging.getLogger("extractor")
 
 
 class FeatureExtractor:
-    def __init__(self, model_path: str, scaler=None, device: str = "cpu"):
+    """
+    FeatureExtractor class
+
+    Parameters
+    ----------
+    model_path : str
+        Path to the model
+    scaler : object, optional
+        Scaler to be used to scale the output of the model, by default None
+    device : str, optional
+        Device to be used for the model, by default "cpu"
+
+    Attributes
+    ----------
+    model : torch.nn.Module
+        Query model
+    device : str
+        Device to be used for the model
+    transform : torchvision.transforms.Compose
+        Transform to be used for the model
+    output_shape : tuple
+        Output shape of the model
+
+    Methods
+    -------
+    extract(image) -> np.ndarray
+        Extract features from the image
+    set_scaler(scaler) -> None
+        Set the scaler to be used for scaling the output of the model
+
+    Examples
+    --------
+    >>> from extractor import FeatureExtractor
+    >>> extractor = FeatureExtractor(model_path="model.pth")
+    >>> image = Image.open("image.jpg")
+    >>> features = extractor.extract(image)
+    >>> features.shape
+    (OUTPUT_SHAPE,)
+    """
+
+    def __init__(
+        self, model_path: str, scaler: str = None, device: str = "cpu"
+    ):
 
         """
         model_path: path to the model
@@ -36,7 +81,7 @@ class FeatureExtractor:
         logger.info(f"Using transform {self._transform}")
 
     @torch.no_grad()
-    def extract(self, image):
+    def extract(self, image) -> np.ndarray:
 
         """
         Extract features from the image
@@ -57,7 +102,7 @@ class FeatureExtractor:
 
         return out.reshape(-1)
 
-    def _get_output_shape(self, image_dim=(1, 3, 100, 100)):
+    def _get_output_shape(self, image_dim=(1, 3, 100, 100)) -> tuple:
 
         """
         Get the output shape of the model
@@ -67,15 +112,7 @@ class FeatureExtractor:
         out = out.cpu().numpy().flatten().reshape(-1)
         return out.shape
 
-    @property
-    def output_shape(self):
-        """
-        Get the output shape of the model
-        """
-
-        return self._get_output_shape()
-
-    def set_scaler(self, scaler):
+    def set_scaler(self, scaler) -> None:
         """
         Set the scaler to be used for scaling the output of the model
         """
@@ -98,11 +135,51 @@ class FeatureExtractor:
 
         logger.info(f"Scaler set to {self._scaler}")
 
+    @property
+    def scaler(self) -> object:
+        """
+        Get the scaler
+        """
+
+        return self._scaler
+
+    @property
+    def model(self) -> torch.nn.Module:
+        """
+        Get the model
+        """
+
+        return self._model
+
+    @property
+    def device(self) -> str:
+        """
+        Get the device
+        """
+
+        return self._device
+
+    @property
+    def transform(self) -> Compose:
+        """
+        Get the transform
+        """
+
+        return self._transform
+
+    @property
+    def output_shape(self) -> tuple:
+        """
+        Get the output shape of the model
+        """
+
+        return self._get_output_shape()
+
     def __call__(self, image):
         return self.extract(image)
 
     def __repr__(self):
-        return f"FeatureExtractor(model={self._model}, device={self._device})"
+        return f"FeatureExtractor(model={self.model}, device={self.device})"
 
     def __str__(self):
         return self.__repr__()

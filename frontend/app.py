@@ -17,7 +17,10 @@ import logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
-    handlers=[logging.FileHandler("./logs/frontend.log"), logging.StreamHandler()],
+    handlers=[
+        logging.FileHandler("./logs/frontend.log"),
+        logging.StreamHandler(),
+    ],
 )
 
 logger = logging.getLogger(__name__)
@@ -47,24 +50,34 @@ def predict(img_file):
         st.write("Error in classification")
 
 
-st.write("Test")
+def main():
+    st.write("Test")
 
-img_file = st.file_uploader("Upload file", type=["png", "jpg", "jpeg"])
+    img_file = st.file_uploader("Upload file", type=["png", "jpg", "jpeg"])
 
-if img_file is not None:
+    if img_file is not None:
 
-    predictions = None
-    logger.info(f"Got image: {type(img_file)}")
-    st.image(img_file, width=WIDTH)
-    st.write("")
+        predictions = None
+        logger.info(f"Got image: {type(img_file)}")
+        st.image(img_file, width=WIDTH)
+        st.write("")
 
-    if st.button("***Find similar***"):
-        predictions = predict(img_file)
+        if st.button("***Find similar***"):
+            predictions = predict(img_file)
 
-    if predictions is not None:
-        for pred in predictions:
-            st.subheader(f"({pred['index']}) {pred['productdisplayname']}")
-            col1, col2 = st.columns(2)
-            col1.image(pred["default"])
-            col2._html(pred["productdescriptors"], scrolling=True, height=450)
-            st.write("")
+        if predictions is not None:
+            for pred in predictions:
+                st.subheader(f"({pred['index']}) {pred['productdisplayname']}")
+                col1, col2 = st.columns(2)
+                col1.image(pred["default"])
+                col2._html(
+                    pred["productdescriptors"], scrolling=True, height=450
+                )
+                st.write("")
+
+        else:
+            st.write("No predictions")
+
+
+if __name__ == "__main__":
+    main()

@@ -112,10 +112,16 @@ def cli():
         description="Make embeddings for the images in the dataset."
     )
     parser.add_argument(
-        "--input_file", type=str, default="data", help="Path to the input file."
+        "--input_file",
+        type=str,
+        default="data",
+        help="Path to the input file.",
     )
     parser.add_argument(
-        "--output_file", type=str, default="data", help="Path to the output file."
+        "--output_file",
+        type=str,
+        default="data",
+        help="Path to the output file.",
     )
     parser.add_argument(
         "--view",
@@ -124,10 +130,18 @@ def cli():
         help="View of the image to use. One of [default, left, right]",
     )
     parser.add_argument("--model_path", type=str, help="Path to the model.")
-    parser.add_argument("--img_size", type=int, default=224, help="Image size.")
-    parser.add_argument("--batch_size", type=int, default=1, help="Batch size.")
-    parser.add_argument("--num_workers", type=int, default=1, help="Number of workers.")
-    parser.add_argument("--device", type=str, default="cpu", help="Device to use.")
+    parser.add_argument(
+        "--img_size", type=int, default=224, help="Image size."
+    )
+    parser.add_argument(
+        "--batch_size", type=int, default=1, help="Batch size."
+    )
+    parser.add_argument(
+        "--num_workers", type=int, default=1, help="Number of workers."
+    )
+    parser.add_argument(
+        "--device", type=str, default="cpu", help="Device to use."
+    )
     args = parser.parse_args()
     return args
 
@@ -167,7 +181,9 @@ def main():
     print("dataset and dataloader made")
 
     # Get the embeddings.
-    embeddings = get_embeddings(model, dataloader, device=args.device, batch=BATCH_SIZE)
+    embeddings = get_embeddings(
+        model, dataloader, device=args.device, batch=BATCH_SIZE
+    )
     print("embeddings made")
     emb_df = process_embeddings(embeddings)
     print("embeddings processed")
