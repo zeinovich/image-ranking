@@ -6,9 +6,7 @@ mlflow
 .pyc
 __pycache__
 tmp
-logs
 ML-models
-*.log
 *.env
 *.pth
 *.pkl

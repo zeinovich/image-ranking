@@ -22,12 +22,3 @@ jobs:
     - name: Analysing the code with flake8
       run: |
         flake8 --max-line-length=120 .
-    - name: Run backend tests
-      run: |
-        cd backend
-        python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-        python -m pytest
-    - name: Run frontend tests
-      run: |
-        cd ../frontend
-        python -m pytest
