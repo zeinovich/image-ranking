@@ -49,13 +49,12 @@ def predict(img_file):
     else:
         st.write("Error in classification")
 
+
 def show_image(pred: dict) -> None:
     st.subheader(f"({pred['index']}) {pred['productdisplayname']}")
     col1, col2 = st.columns(2)
     col1.image(pred["default"])
-    col2._html(
-        pred["productdescriptors"], scrolling=True, height=450
-    )
+    col2._html(pred["productdescriptors"], scrolling=True, height=450)
     st.write("")
 
 
@@ -77,7 +76,7 @@ def main():
         if predictions is not None:
             for pred in predictions:
                 show_image(pred)
-                
+
         else:
             st.write("No predictions")
 

@@ -15,13 +15,13 @@ import pandas as pd
 import pickle
 import logging
 import base64
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from os import getenv
 
 from .feature_extractor.extractor import FeatureExtractor
 from .ranker.ranker import Ranker
 
-load_dotenv("./backend.env")
+# load_dotenv("./backend.env")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -51,6 +51,7 @@ logger.info(f"{PASSWORD=}")
 logger.info(f"{DB=}")
 
 logger.info("Successfully loaded environment")
+
 try:
     with open(SCALER_PATH, "rb") as f:
         scaler = pickle.load(f)
@@ -62,11 +63,16 @@ except Exception as e:
 
 try:
     feature_extractor = FeatureExtractor(FEATURE_EXTRACTOR_PATH, scaler=scaler)
+    logger.info(f"{feature_extractor}")
+
     ranker = Ranker(RANKER_PATH)
+    logger.info(f"{ranker}")
+    logger.info("Succesfully loaded models")
 
 except Exception as e:
     logger.error(f"Error loading models: {e}")
     raise e
+
 
 try:
     connection = f"postgresql://{USER}:{PASSWORD}@postgres:5432/{DB}"

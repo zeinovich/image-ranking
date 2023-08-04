@@ -1,21 +1,6 @@
 import pickle
 import numpy as np
 
-# import os
-import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.FileHandler("./logs/ranker.log"),
-        logging.StreamHandler(),
-    ],
-)
-
-logger = logging.getLogger("ranker")
-
 
 class Ranker:
     """
@@ -58,17 +43,10 @@ class Ranker:
             self._model = pickle.load(model)
 
         self._K = K
-        logger.info(f"Ranker initialized from {model_path}")
-        logger.info(f"{self.K=}")
-        logger.info(f"RANKER={self.model}")
 
     def rank(self, query: np.ndarray) -> np.ndarray:
-        logger.info(f"query.shape={query.shape}")
         query = query.reshape(1, -1)
-
         distances, indices = self._model.kneighbors(query, n_neighbors=self.K)
-        logger.info(f"query={query} => indices={indices}")
-
         return distances.reshape(-1), indices.reshape(-1)
 
     @property
@@ -84,3 +62,6 @@ class Ranker:
         Query model
         """
         return self._model
+
+    def __repr__(self) -> str:
+        return f"Ranker(model={self.model}, K={self.K})"

@@ -2,21 +2,6 @@ import torch
 from torchvision.transforms import Compose, ToTensor
 import numpy as np
 
-import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.FileHandler("./logs/extractor.log"),
-        logging.StreamHandler(),
-    ],
-)
-
-
-logger = logging.getLogger("extractor")
-
 
 class FeatureExtractor:
     """
@@ -75,11 +60,6 @@ class FeatureExtractor:
         self._scaler = scaler
         self._model.eval()
 
-        logger.info(f"Loaded model from {model_path}")
-        logger.info(f"Using device {self._device}")
-        logger.info(f"Using scaler {self._scaler}")
-        logger.info(f"Using transform {self._transform}")
-
     @torch.no_grad()
     def extract(self, image) -> np.ndarray:
 
@@ -91,14 +71,11 @@ class FeatureExtractor:
         """
 
         image = self._transform(image).unsqueeze(0).to(self._device)
-        logger.info(f"Extracting features from image of shape {image.shape}")
 
         out = self._model(image).cpu().numpy().flatten().reshape(1, -1)
-        logger.info(f"Extracted features of shape {out.shape}")
 
         if self._scaler is not None:
             out = self._scaler.transform(out)
-            logger.info(f"Scaled features of shape {out.shape}")
 
         return out.reshape(-1)
 
@@ -129,11 +106,8 @@ class FeatureExtractor:
             ), f"Scaler {self._scaler} is not working properly"
 
         except Exception as e:
-            logger.exception(e)
             self._scaler = None
-            logger.info("Scaler set to None")
-
-        logger.info(f"Scaler set to {self._scaler}")
+            raise e
 
     @property
     def scaler(self) -> object:
@@ -179,7 +153,8 @@ class FeatureExtractor:
         return self.extract(image)
 
     def __repr__(self):
-        return f"FeatureExtractor(model={self.model}, device={self.device})"
+        return f"FeatureExtractor(model={self.model}, device={self.device},\
+              scaler={self.scaler}, transform={self.transform})"
 
     def __str__(self):
         return self.__repr__()

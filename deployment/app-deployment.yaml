@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: backend:0.1
+        ports:
+        - containerPort: 8888
+        env:
+        - name: FEATURE_EXTRACTOR_PATH
+          valueFrom:
+            configMapRefKey:
+              name: app-config
+              key: extractor_path
+        - name: RANKER_PATH
+          valueFrom:
+            configMapRefKey:
+              name: app-config
+              key: ranker_path
+        - name: SCALER_PATH
+          valueFrom:
+            configMapRefKey:
+              name: app-config
+              key: scaler_path
+        - name: POSTGRES_DB
+          valueFrom:
+            secretRefKey:
+              name: db-secret
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            secretRefKey:
+              name: db-secret
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretRefKey:
+              name: db-secrets
+              key: POSTGRES_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend-service
+  ports:
+    - protocol: TCP
+      port: 8888
+      targetPort: 8888
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:0.1
+        ports:
+        - containerPort: 8501
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8501
+      targetPort: 8501
+      nodePort: 32000

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-db
+  labels:
+    app: postgres-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-db
+  template:
+    metadata:
+      labels:
+        app: postgres-db
+    spec:
+      containers:
+      - name: postgres-db
+        image: postgres:14.8
+        ports:
+        - containerPort: 5432
+        envFrom:
+          - configMapRef:
+              name: db-secret-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  selector:
+    app: postgres-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  labels:
+    app: pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+      - name: pgadmin
+        image: dpage/pgadmin4:7.5
+        ports:
+        - containerPort: 443
+        envFrom:
+          - configMapRef:
+              name: db-secret-credentials
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin-service
+spec:
+  selector:
+    app: pgadmin
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 443
+      nodePort: 32123
