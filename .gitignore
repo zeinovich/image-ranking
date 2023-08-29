@@ -12,3 +12,4 @@ ML-models
 *.pkl
 *.csv
 *.json
+*.ipynb
