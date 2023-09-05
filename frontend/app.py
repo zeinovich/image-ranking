@@ -18,7 +18,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler("./logs/frontend.log"),
+        # logging.FileHandler("./logs/frontend.log"),
         logging.StreamHandler(),
     ],
 )

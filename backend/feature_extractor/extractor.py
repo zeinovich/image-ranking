@@ -1,5 +1,6 @@
 import torch
-from torchvision.transforms import Compose, ToTensor
+from torchvision.transforms import Compose, ToTensor, Normalize, Resize, CenterCrop
+from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
 import numpy as np
 
 
@@ -55,8 +56,13 @@ class FeatureExtractor:
         """
 
         self._device = device
-        self._model = torch.load(model_path, map_location=self._device)
-        self._transform = Compose([ToTensor()])
+        self._model = efficientnet_v2_s(weights=EfficientNet_V2_S_Weights.DEFAULT).features
+        
+        self._transform = Compose([ToTensor(),
+                                   Resize((384, 384)),
+                                   CenterCrop((384, 384)),
+                                   Normalize(mean=[0.485, 0.456, 0.406],
+                                             std=[0.229, 0.224, 0.225])])
         self._scaler = scaler
         self._model.eval()
 

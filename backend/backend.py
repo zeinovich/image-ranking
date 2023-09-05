@@ -18,8 +18,9 @@ import base64
 # from dotenv import load_dotenv
 from os import getenv
 
-from .feature_extractor.extractor import FeatureExtractor
-from .ranker.ranker import Ranker
+from feature_extractor.extractor import FeatureExtractor
+from ranker.ranker import Ranker
+from segmentation import DeepLabSegmentor
 
 # load_dotenv("./backend.env")
 
@@ -27,7 +28,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler("./logs/backend.log"),
+        # logging.FileHandler("./logs/backend.log"),
         logging.StreamHandler(),
     ],
 )
@@ -67,6 +68,9 @@ try:
 
     ranker = Ranker(RANKER_PATH)
     logger.info(f"{ranker}")
+
+    segmentor = DeepLabSegmentor()
+    logger.info(f"{segmentor}")
     logger.info("Succesfully loaded models")
 
 except Exception as e:
@@ -95,11 +99,14 @@ def load_image_from_json(data: dict) -> Image:
 
 
 def get_predictions(
-    image: Image, feature_extractor: FeatureExtractor, ranker: Ranker
+    image: Image, feature_extractor: FeatureExtractor, ranker: Ranker,
+    segmentor: DeepLabSegmentor
 ) -> list:
 
     logger.info(f"Opened image: {type(image)} of size: {image.size}")
 
+    foreground, _ = segmentor.segment(image)
+    image = Image.fromarray(foreground)
     features = feature_extractor.extract(image)
     logger.info(f"Extracted features: {features.shape}")
 
@@ -160,7 +167,7 @@ def predict():
         logger.info(f"Got JSON: {type(data)}")
 
         image = load_image_from_json(data)
-        distances, ids = get_predictions(image, feature_extractor, ranker)
+        distances, ids = get_predictions(image, feature_extractor, ranker, segmentor)
         predictions_urls = get_info_from_db(distances, ids)
 
         if predictions_urls is None:
