@@ -7,7 +7,7 @@ from torchvision.transforms import (
     Resize,
     CenterCrop,
 )
-from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
+from torchvision.models import efficientnet_v2_s
 import numpy as np
 
 
@@ -63,7 +63,6 @@ class FeatureExtractor:
         """
 
         self._device = device
-        # self._model = efficientnet_v2_s(weights=EfficientNet_V2_S_Weights.DEFAULT)
         self._model = efficientnet_v2_s()
         self._model.load_state_dict(
             torch.load(model_path, map_location=torch.device(device))

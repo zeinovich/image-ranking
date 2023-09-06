@@ -9,7 +9,7 @@ class Segmentor:
     Model for segmenting images
 
     Wrapper above nn.Module
-    
+
     ---
     Parameters
     ---
