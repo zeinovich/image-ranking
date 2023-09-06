@@ -1,1 +1,1 @@
-from .segmentor import DeepLabSegmentor
+from .segmentor import Segmentor

@@ -1,5 +1,12 @@
 import torch
-from torchvision.transforms import Compose, ToTensor, Normalize, Resize, CenterCrop
+import torch.nn as nn
+from torchvision.transforms import (
+    Compose,
+    ToTensor,
+    Normalize,
+    Resize,
+    CenterCrop,
+)
 from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
 import numpy as np
 
@@ -56,15 +63,25 @@ class FeatureExtractor:
         """
 
         self._device = device
-        self._model = efficientnet_v2_s(weights=EfficientNet_V2_S_Weights.DEFAULT).features
-        
-        self._transform = Compose([ToTensor(),
-                                   Resize((384, 384)),
-                                   CenterCrop((384, 384)),
-                                   Normalize(mean=[0.485, 0.456, 0.406],
-                                             std=[0.229, 0.224, 0.225])])
+        # self._model = efficientnet_v2_s(weights=EfficientNet_V2_S_Weights.DEFAULT)
+        self._model = efficientnet_v2_s()
+        self._model.load_state_dict(
+            torch.load(model_path, map_location=torch.device(device))
+        )
+        self._model = nn.Sequential(self._model.features, self._model.avgpool)
+
+        self._transform = Compose(
+            [
+                ToTensor(),
+                Resize((384, 384)),
+                CenterCrop((384, 384)),
+                Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
         self._scaler = scaler
-        self._model.eval()
+        self._model = self._model.eval()
 
     @torch.no_grad()
     def extract(self, image) -> np.ndarray:
@@ -159,7 +176,7 @@ class FeatureExtractor:
         return self.extract(image)
 
     def __repr__(self):
-        return f"FeatureExtractor(model={self.model}, device={self.device},\
+        return f"FeatureExtractor(model=EfficientNet_v2_s, device={self.device},\
               scaler={self.scaler}, transform={self.transform})"
 
     def __str__(self):

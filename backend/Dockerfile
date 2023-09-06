@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 8888
 
-ENTRYPOINT [ "gunicorn", "--bind", "0.0.0.0:8888", "backend:app" ]
+ENTRYPOINT [ "gunicorn", "--bind", "0.0.0.0:8888", "--timeout", "240", "backend:app" ]

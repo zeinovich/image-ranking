@@ -61,6 +61,13 @@ services:
       - image-ranking
     ports:
       - 8888:8888
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8888/api/v1.0/health || exit 1"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+    #   start_period: 10s
+    # restart: unless-stopped
     
   frontend:
     container_name: frontend
