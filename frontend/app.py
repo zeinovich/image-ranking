@@ -13,12 +13,14 @@ import requests
 import base64
 import json
 import logging
+from PIL import Image
+from io import BytesIO
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler("./logs/frontend.log"),
+        # logging.FileHandler("./logs/frontend.log"),
         logging.StreamHandler(),
     ],
 )
@@ -28,7 +30,32 @@ logger = logging.getLogger(__name__)
 WIDTH = 360
 
 
-def predict(img_file):
+def decode_image(im_bytes: str) -> Image:
+    """
+    Decode image from base64
+
+    Args:
+        im_bytes (str): Image in base64 format
+
+    Returns:
+        Image: Image"""
+
+    logger.info(f"Got image: {type(im_bytes)}")
+    img = base64.b64decode(im_bytes.encode("utf-8"))
+    image = Image.open(BytesIO(img))
+    return image
+
+
+def predict(img_file: BytesIO) -> dict[dict, str]:
+    """
+    Send image to backend for classification
+
+    Args:
+        img_file (BytesIO): Image file
+
+    Returns:
+        dict: Predictions"""
+
     placeholder = st.empty()
     placeholder.write("Classifying...")
 
@@ -44,13 +71,23 @@ def predict(img_file):
     placeholder.empty()
     if response.status_code == 200:
         predictions = response.json()["predictions"]
-        return predictions
+        segmented_image = response.json()["segmented_image"]
+        return predictions, segmented_image
 
     else:
         st.write("Error in classification")
 
 
 def show_image(pred: dict) -> None:
+    """
+    Show image and product description
+
+    Args:
+        pred (dict): Prediction
+
+    Returns:
+        None"""
+
     st.subheader(f"({pred['index']}) {pred['productdisplayname']}")
     col1, col2 = st.columns(2)
     col1.image(pred["default"])
@@ -64,16 +101,17 @@ def main():
     img_file = st.file_uploader("Upload file", type=["png", "jpg", "jpeg"])
 
     if img_file is not None:
-
+        placeholder = st.empty()
         predictions = None
         logger.info(f"Got image: {type(img_file)}")
-        st.image(img_file, width=WIDTH)
+        placeholder.image(img_file, width=WIDTH)
         st.write("")
 
-        if st.button("***Find similar***"):
-            predictions = predict(img_file)
+        predictions, segmented_image = predict(img_file)
 
         if predictions is not None:
+            segmented_image = decode_image(segmented_image)
+            placeholder.image(segmented_image, width=WIDTH)
             for pred in predictions:
                 show_image(pred)
 
