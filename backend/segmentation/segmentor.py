@@ -131,3 +131,6 @@ class Segmentor:
         returns: segmented image
         """
         return self._remove_background(input_img)
+
+    def __repr__(self) -> str:
+        return "Segmentor(model=DeepLabV3_ResNet50)"

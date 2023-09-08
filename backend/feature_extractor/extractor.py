@@ -8,6 +8,8 @@ from torchvision.transforms import (
     CenterCrop,
 )
 from torchvision.models import efficientnet_v2_s
+
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 
@@ -53,7 +55,7 @@ class FeatureExtractor:
     """
 
     def __init__(
-        self, model_path: str, scaler: str = None, device: str = "cpu"
+        self, model_path: str, scaler: StandardScaler = None, device: str = "cpu"
     ):
 
         """
@@ -64,6 +66,8 @@ class FeatureExtractor:
 
         self._device = device
         self._model = efficientnet_v2_s()
+        self._model_name = self._model.__class__.__name__
+
         self._model.load_state_dict(
             torch.load(model_path, map_location=torch.device(device))
         )
@@ -107,11 +111,11 @@ class FeatureExtractor:
         Get the output shape of the model
         """
 
-        out = self._model(torch.rand(*(image_dim))).data
+        out = self._model(torch.zeros(*(image_dim))).data
         out = out.cpu().numpy().flatten().reshape(-1)
         return out.shape
 
-    def set_scaler(self, scaler) -> None:
+    def set_scaler(self, scaler: StandardScaler) -> None:
         """
         Set the scaler to be used for scaling the output of the model
         """
@@ -175,8 +179,7 @@ class FeatureExtractor:
         return self.extract(image)
 
     def __repr__(self):
-        return f"FeatureExtractor(model=EfficientNet_v2_s, device={self.device},\
-              scaler={self.scaler}, transform={self.transform})"
+        return f"FeatureExtractor(model={self._model_name}, output_shape={self.output_shape})"
 
     def __str__(self):
         return self.__repr__()

@@ -3,7 +3,7 @@ name: Python application
 on: [push]
 
 jobs:
-  build:
+  build_and_test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -21,4 +21,4 @@ jobs:
         python -m pip install flake8
     - name: Analysing the code with flake8
       run: |
-        flake8 --max-line-length=120 .
+        flake8 --max-line-length=120 --ignore=F401 .

@@ -16,7 +16,7 @@ class Ranker:
     Attributes
     ----------
     model : sklearn.neighbors model
-        Query model. Should have a `kneighbors` method
+        Query model. Must have a `kneighbors` method
     K : int
         Number of nearest neighbors to return
 
@@ -44,10 +44,14 @@ class Ranker:
 
         self._K = K
 
+    def _candidates(self, query_point: np.ndarray) -> np.ndarray:
+        return self._model.kneighbors(query_point, n_neighbors=self.K)[1]
+
     def rank(self, query: np.ndarray) -> np.ndarray:
-        query = query.reshape(1, -1)
-        distances, indices = self._model.kneighbors(query, n_neighbors=self.K)
-        return distances.reshape(-1), indices.reshape(-1)
+        query_point = query.reshape(1, -1)
+        indices = self._candidates(query_point)
+
+        return indices.reshape(-1)
 
     @property
     def K(self):

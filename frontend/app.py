@@ -9,23 +9,24 @@ Usage:
 """
 
 import streamlit as st
+from PIL import Image
+
 import requests
-import base64
 import json
 import logging
-from PIL import Image
+
 from io import BytesIO
+import base64
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
+    format="[%(asctime)s] [%(levelname)s] %(name)s - %(message)s",
     handlers=[
-        # logging.FileHandler("./logs/frontend.log"),
         logging.StreamHandler(),
     ],
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("frontend")
 
 WIDTH = 360
 
@@ -40,9 +41,9 @@ def decode_image(im_bytes: str) -> Image:
     Returns:
         Image: Image"""
 
-    logger.info(f"Got image: {type(im_bytes)}")
     img = base64.b64decode(im_bytes.encode("utf-8"))
     image = Image.open(BytesIO(img))
+    logger.info(f"Got image of size: {image.size}")
     return image
 
 
@@ -62,8 +63,11 @@ def predict(img_file: BytesIO) -> dict[dict, str]:
     im_bytes = img_file.getvalue()
     im_b64 = base64.b64encode(im_bytes).decode("utf8")
 
+    logger.info('Turned image into bytes. Preparing JSON request')
     headers = {"Content-type": "application/json", "Accept": "text/plain"}
     payload = json.dumps({"image": im_b64})
+
+    logger.info('Posting request')
     response = requests.post(
         "http://backend:8888/api/v1.0/predict", data=payload, headers=headers
     )
@@ -72,9 +76,11 @@ def predict(img_file: BytesIO) -> dict[dict, str]:
     if response.status_code == 200:
         predictions = response.json()["predictions"]
         segmented_image = response.json()["segmented_image"]
+        logger.info('Succesfully retrived preditions')
         return predictions, segmented_image
 
     else:
+        logger.error('Some error occured during prediction')
         st.write("Error in classification")
 
 
