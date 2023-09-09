@@ -1,6 +1,11 @@
 # Image-Based Recommendation System
 ## Motivation
 Recommendation systems are key for every retail to success. They greatly improve not only user experience, but also revenue as accurate recommendations make users buy more. State of the art recommendation systems developed by Amazon or Google use a great variety of features and user history, however I will build a baseline solution using only image similarity.
+## System
+
+![image](https://github.com/zeinovich/image-recsys/assets/114425094/f812e71f-6980-4318-8c8f-4da609e0c5a3)
+
+
 ##  Data
 For now, I used only [Fashion Dataset](https://www.kaggle.com/datasets/paramaggarwal/fashion-product-images-dataset) from kaggle. It contains ~44K images of clothes, shoes and accessories from retail stores. Also it provides a lot of meta about every images, like price, discount, display categories, etc. Data was divided 80%:20% train and test set.
 ## Models
@@ -29,10 +34,6 @@ For validation StratifiedKFold was used. As classification metric *precision, re
 Models achieved  **93%** precision, recall on subCategory and **99,8%** precision, recall on masterCategory.
 ## Data Storage
 For data storage, I used plain [PostgreSQL](https://hub.docker.com/_/postgres). See [docker-compose file](https://github.com/zeinovich/image-recsys/blob/main/docker-compose.yaml). 
-## System
-
-![image](https://github.com/zeinovich/image-recsys/assets/114425094/f812e71f-6980-4318-8c8f-4da609e0c5a3)
-
 
 ## Backend
 [Backend](https://github.com/zeinovich/image-recsys/tree/main/backend) is written in Flask framework. It accepts image' bytes from frontend as *HTTP request*, [segments foreground](https://github.com/zeinovich/image-recsys/tree/main/backend/segmentation/segmentor.py) and [extracts features](https://github.com/zeinovich/image-recsys/tree/main/backend/feature_extractor/extractor.py) from it, then [KNN](https://github.com/zeinovich/image-recsys/tree/main/backend/ranker/ranker.py) queries *n* similar images. After that, it makes call to database to get additional info of images and sends *HTTP request* back to frontend.
