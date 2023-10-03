@@ -67,7 +67,6 @@ class FeatureExtractor:
         self._device = device
         self._model = efficientnet_v2_s()
         self._model_name = self._model.__class__.__name__
-
         self._model.load_state_dict(
             torch.load(model_path, map_location=torch.device(device))
         )
@@ -76,11 +75,9 @@ class FeatureExtractor:
         self._transform = Compose(
             [
                 ToTensor(),
-                Resize((384, 384)),
+                Resize((384, 384), antialias=True),
                 CenterCrop((384, 384)),
-                Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
+                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ]
         )
         self._scaler = scaler
@@ -133,7 +130,6 @@ class FeatureExtractor:
 
         except Exception as e:
             self._scaler = None
-            raise e
 
     @property
     def scaler(self) -> object:
@@ -179,7 +175,8 @@ class FeatureExtractor:
         return self.extract(image)
 
     def __repr__(self):
-        return f"FeatureExtractor(model={self._model_name}, output_shape={self.output_shape})"
+        return f"FeatureExtractor(model={self._model_name}, \
+output_shape={self.output_shape})"
 
     def __str__(self):
         return self.__repr__()

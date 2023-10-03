@@ -31,7 +31,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger("backend")
-logger.info('[STARTED]')
+logger.info("[STARTED]")
 
 FEATURE_EXTRACTOR_PATH = os.getenv("FEATURE_EXTRACTOR_PATH")
 SEGMENTATION_MODEL = os.getenv("SEGMENTATION_MODEL")
@@ -59,7 +59,7 @@ try:
         scaler = pickle.load(f)
 
 except Exception as e:
-    logger.error(f"Error loading scaler: {e}")
+    logger.error(f"Error loading scaler: {e}\n{traceback.format_exc()}")
     logger.info("Setting scaler to None")
     scaler = None
 
@@ -77,8 +77,7 @@ try:
     logger.info("Succesfully loaded models")
 
 except Exception as e:
-    logger.error(f"Error loading models: {e}")
-    raise e
+    logger.error(f"Error loading models: {e}\n{traceback.format_exc()}")
 
 
 try:
@@ -87,8 +86,7 @@ try:
     logger.info("Connected to DB")
 
 except Exception as e:
-    logger.error(f"Error connecting to DB: {e}")
-    raise e
+    logger.error(f"Error connecting to DB: {e}\n{traceback.format_exc()}")
 
 app = Flask(__name__)
 logger.info("[READY] Flask app ready")
@@ -160,9 +158,7 @@ def get_info_from_db(ids: list) -> dict:
         logger.info(f"Retrieved candidates: {df.shape}")
 
         predictions = df.to_dict(orient="records")
-        logger.info(
-            f'Candidates: {[pred["index"] for pred in predictions]}'
-        )
+        logger.info(f'Candidates: {[pred["index"] for pred in predictions]}')
 
         return predictions
 
@@ -181,7 +177,7 @@ def dump_image(image: Image) -> str:
         str: Image in base64 format"""
 
     img_byte_arr = BytesIO()
-    image.save(img_byte_arr, format='PNG')
+    image.save(img_byte_arr, format="PNG")
     img_byte_arr = img_byte_arr.getvalue()
 
     im_bytes = base64.b64encode(img_byte_arr).decode()
@@ -204,15 +200,11 @@ def predict():
         segmented_image = Image.fromarray(segmented_image).convert("RGB")
         segmented_bytes = dump_image(segmented_image)
 
-        ids = get_predictions(
-            segmented_image, feature_extractor, ranker
-        )
+        ids = get_predictions(segmented_image, feature_extractor, ranker)
         predictions_urls = get_info_from_db(ids)
 
         if predictions_urls is None:
-            return jsonify(
-                {"error": "No predictions found", "status_code": 404}
-            )
+            return jsonify({"error": "No predictions found", "status_code": 404})
 
         return jsonify(
             {

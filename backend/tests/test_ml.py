@@ -1,5 +1,5 @@
-from backend.feature_extractor.extractor import FeatureExtractor
-from backend.ranker.ranker import Ranker
+from ..feature_extractor.extractor import FeatureExtractor
+from ..ranker.ranker import Ranker
 
 from PIL import Image
 from urllib.request import urlopen
@@ -9,7 +9,7 @@ import pickle
 from dotenv import load_dotenv
 from os import getenv
 
-load_dotenv("./backend.env")
+load_dotenv("backend.test.env")
 
 FEATURE_EXTRACTOR_PATH = getenv("FEATURE_EXTRACTOR_PATH")
 RANKER_PATH = getenv("RANKER_PATH")
@@ -18,11 +18,12 @@ TEST_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons\
 /thumb/b/b6/Image_created_with_a_mobile_phone.png\
 /330px-Image_created_with_a_mobile_phone.png"
 
+print(FEATURE_EXTRACTOR_PATH)
 
 # test feature extractor
 @pytest.fixture
 def extractor():
-    return FeatureExtractor(model_path=FEATURE_EXTRACTOR_PATH, device="cpu")
+    return FeatureExtractor(model_path="ml-models/feature_extractor.pth", device="cpu")
 
 
 def test_feature_extractor(extractor: FeatureExtractor):
@@ -77,9 +78,9 @@ def test_feature_extractor_repr(extractor: FeatureExtractor):
 # test ranker
 @pytest.fixture
 def ranker():
-    return Ranker(model_path=RANKER_PATH)
+    return Ranker("ml-models/ranker.pkl")
 
 
-def test_ranker(ranker, extractor):
+def test_ranker(ranker: Ranker, extractor):
     query = np.random.rand(1, extractor.output_shape[0])
-    assert ranker.rank(query)[0].shape == (5,)
+    assert ranker.rank(query).shape == (5,)

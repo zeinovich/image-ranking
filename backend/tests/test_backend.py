@@ -1,4 +1,4 @@
-from backend.backend import (
+from ..backend import (
     app,
     get_predictions,
     load_image_from_json,
@@ -6,8 +6,8 @@ from backend.backend import (
     get_info_from_db,
     health,
 )
-from backend.feature_extractor.extractor import FeatureExtractor
-from backend.ranker.ranker import Ranker
+from ..feature_extractor.extractor import FeatureExtractor
+from ..ranker.ranker import Ranker
 
 from PIL import Image
 from urllib.request import urlopen
@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 from os import getenv
 import pytest
 
-load_dotenv("./backend.env")
+load_dotenv("backend.test.env")
 
 TEST_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons\
 /thumb/b/b6/Image_created_with_a_mobile_phone.png\
@@ -29,17 +29,20 @@ SCALER_PATH = getenv("SCALER_PATH")
 
 @pytest.fixture
 def extractor():
-    return FeatureExtractor(model_path=FEATURE_EXTRACTOR_PATH, device="cpu")
+    return FeatureExtractor(model_path="ml-models/feature_extractor.pth", device="cpu")
 
 
 @pytest.fixture
 def ranker():
-    return Ranker(RANKER_PATH)
+    return Ranker("ml-models/ranker.pkl")
 
 
 def test_load_image_from_json():
     # prepare image
-    url = TEST_IMAGE_URL
+    url = "https://upload.wikimedia.org/wikipedia/commons\
+/thumb/b/b6/Image_created_with_a_mobile_phone.png\
+/330px-Image_created_with_a_mobile_phone.png"
+
     img_file = urlopen(url)
     im_bytes = img_file.read()
     im_b64 = base64.b64encode(im_bytes).decode("utf8")
@@ -55,7 +58,9 @@ def test_load_image_from_json():
 
 def test_get_prediction(extractor: FeatureExtractor, ranker: Ranker):
     # prepare image
-    url = TEST_IMAGE_URL
+    url = "https://upload.wikimedia.org/wikipedia/commons\
+/thumb/b/b6/Image_created_with_a_mobile_phone.png\
+/330px-Image_created_with_a_mobile_phone.png"
     img_file = urlopen(url)
     im_bytes = img_file.read()
     im_b64 = base64.b64encode(im_bytes).decode("utf8")
@@ -69,11 +74,8 @@ def test_get_prediction(extractor: FeatureExtractor, ranker: Ranker):
     # get predictions
     predictions = get_predictions(image, extractor, ranker)
 
-    assert isinstance(predictions, tuple)
-    assert len(predictions) == 2
-    assert isinstance(predictions[0], list)
-    assert isinstance(predictions[1], list)
-    assert len(predictions[0]) == len(predictions[1]) == ranker.K
+    assert isinstance(predictions, list)
+    assert len(predictions) == ranker.K
 
 
 def test_predict():
@@ -83,10 +85,9 @@ def test_predict():
 
 
 def test_get_info_from_db():
-    DISTANCES = [123, 456, 789, 101112, 131415]
     IDS = [1, 2, 3, 4, 5]
 
-    response = get_info_from_db(DISTANCES, IDS)
+    response = get_info_from_db(IDS)
     assert response is None
 
 

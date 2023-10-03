@@ -63,11 +63,11 @@ def predict(img_file: BytesIO) -> dict[dict, str]:
     im_bytes = img_file.getvalue()
     im_b64 = base64.b64encode(im_bytes).decode("utf8")
 
-    logger.info('Turned image into bytes. Preparing JSON request')
+    logger.info("Turned image into bytes. Preparing JSON request")
     headers = {"Content-type": "application/json", "Accept": "text/plain"}
     payload = json.dumps({"image": im_b64})
 
-    logger.info('Posting request')
+    logger.info("Posting request")
     response = requests.post(
         "http://backend:8888/api/v1.0/predict", data=payload, headers=headers
     )
@@ -76,11 +76,11 @@ def predict(img_file: BytesIO) -> dict[dict, str]:
     if response.status_code == 200:
         predictions = response.json()["predictions"]
         segmented_image = response.json()["segmented_image"]
-        logger.info('Succesfully retrived preditions')
+        logger.info("Succesfully retrived preditions")
         return predictions, segmented_image
 
     else:
-        logger.error('Some error occured during prediction')
+        logger.error("Some error occured during prediction")
         st.write("Error in classification")
 
 
