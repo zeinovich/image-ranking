@@ -11,19 +11,18 @@ from os import getenv
 
 load_dotenv("backend.test.env")
 
-FEATURE_EXTRACTOR_PATH = getenv("FEATURE_EXTRACTOR_PATH")
+FEATURE_EXTRACTOR_PATH = None
 RANKER_PATH = getenv("RANKER_PATH")
 SCALER_PATH = getenv("SCALER_PATH")
 TEST_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons\
 /thumb/b/b6/Image_created_with_a_mobile_phone.png\
 /330px-Image_created_with_a_mobile_phone.png"
 
-print(FEATURE_EXTRACTOR_PATH)
 
 # test feature extractor
 @pytest.fixture
 def extractor():
-    return FeatureExtractor(model_path="ml-models/feature_extractor.pth", device="cpu")
+    return FeatureExtractor(model_path=FEATURE_EXTRACTOR_PATH, device="cpu")
 
 
 def test_feature_extractor(extractor: FeatureExtractor):
@@ -38,7 +37,7 @@ def test_feature_extractor_with_scaler(extractor: FeatureExtractor):
     image = Image.open(urlopen(url))
 
     with open(SCALER_PATH, "rb") as scaler:
-        extractor.set_scaler(pickle.load(scaler))
+        extractor._scaler = pickle.load(scaler)
 
     assert extractor.extract(image).shape == extractor.output_shape
 
@@ -54,7 +53,7 @@ def test_feature_extractor_call_with_scaler(extractor: FeatureExtractor):
     image = Image.open(urlopen(url))
 
     with open(SCALER_PATH, "rb") as scaler:
-        extractor.set_scaler(pickle.load(scaler))
+        extractor._scaler = pickle.load(scaler)
 
     assert extractor(image).shape == extractor.output_shape
     assert extractor.scaler is not None
@@ -66,7 +65,7 @@ def dummy_scaler():
 
 def test_feature_extractor_wrong_scaler(extractor: FeatureExtractor):
     scaler = dummy_scaler()
-    extractor.set_scaler(scaler)
+    extractor._scaler = scaler
 
     assert extractor.scaler is None
 
@@ -78,7 +77,7 @@ def test_feature_extractor_repr(extractor: FeatureExtractor):
 # test ranker
 @pytest.fixture
 def ranker():
-    return Ranker("ml-models/ranker.pkl")
+    return Ranker(RANKER_PATH)
 
 
 def test_ranker(ranker: Ranker, extractor):

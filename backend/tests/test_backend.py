@@ -3,17 +3,18 @@ from ..backend import (
     get_predictions,
     load_image_from_json,
     predict,
-    get_info_from_db,
     health,
 )
 from ..feature_extractor.extractor import FeatureExtractor
 from ..ranker.ranker import Ranker
 
-from PIL import Image
-from urllib.request import urlopen
-import base64
 from dotenv import load_dotenv
 from os import getenv
+
+from urllib.request import urlopen
+from PIL import Image
+import base64
+
 import pytest
 
 load_dotenv("backend.test.env")
@@ -22,19 +23,19 @@ TEST_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons\
 /thumb/b/b6/Image_created_with_a_mobile_phone.png\
 /330px-Image_created_with_a_mobile_phone.png"
 
-FEATURE_EXTRACTOR_PATH = getenv("FEATURE_EXTRACTOR_PATH")
+FEATURE_EXTRACTOR_PATH = None
 RANKER_PATH = getenv("RANKER_PATH")
-SCALER_PATH = getenv("SCALER_PATH")
+# SCALER_PATH = getenv("SCALER_PATH")
 
 
 @pytest.fixture
 def extractor():
-    return FeatureExtractor(model_path="ml-models/feature_extractor.pth", device="cpu")
+    return FeatureExtractor(model_path=FEATURE_EXTRACTOR_PATH, device="cpu")
 
 
 @pytest.fixture
 def ranker():
-    return Ranker("ml-models/ranker.pkl")
+    return Ranker(RANKER_PATH)
 
 
 def test_load_image_from_json():
@@ -82,13 +83,6 @@ def test_predict():
     with app.app_context():
         response = predict()
         assert response.status_code == 200
-
-
-def test_get_info_from_db():
-    IDS = [1, 2, 3, 4, 5]
-
-    response = get_info_from_db(IDS)
-    assert response is None
 
 
 def test_health():

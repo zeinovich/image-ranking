@@ -66,17 +66,24 @@ class FeatureExtractor:
 
         self._device = device
         self._model = efficientnet_v2_s()
+        self._out_shape = 1280
+        self._in_shape = 384
         self._model_name = self._model.__class__.__name__
-        self._model.load_state_dict(
-            torch.load(model_path, map_location=torch.device(device))
-        )
+        self._initialized = False
+
+        if model_path is not None:
+            self._model.load_state_dict(
+                torch.load(model_path, map_location=torch.device(device))
+            )
+            self._initialized = True
+
         self._model = nn.Sequential(self._model.features, self._model.avgpool)
 
         self._transform = Compose(
             [
                 ToTensor(),
-                Resize((384, 384), antialias=True),
-                CenterCrop((384, 384)),
+                Resize((self._in_shape, self._in_shape), antialias=True),
+                CenterCrop((self._in_shape, self._in_shape)),
                 Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ]
         )
@@ -101,35 +108,6 @@ class FeatureExtractor:
             out = self._scaler.transform(out)
 
         return out.reshape(-1)
-
-    def _get_output_shape(self, image_dim=(1, 3, 100, 100)) -> tuple:
-
-        """
-        Get the output shape of the model
-        """
-
-        out = self._model(torch.zeros(*(image_dim))).data
-        out = out.cpu().numpy().flatten().reshape(-1)
-        return out.shape
-
-    def set_scaler(self, scaler: StandardScaler) -> None:
-        """
-        Set the scaler to be used for scaling the output of the model
-        """
-
-        self._scaler = scaler
-
-        # test the scaler
-        try:
-            test_input = np.random.rand(1, self.output_shape[0])
-            test_output = self._scaler.transform(test_input)
-
-            assert (
-                test_input.shape == test_output.shape
-            ), f"Scaler {self._scaler} is not working properly"
-
-        except Exception as e:
-            self._scaler = None
 
     @property
     def scaler(self) -> object:
@@ -158,7 +136,7 @@ class FeatureExtractor:
     @property
     def transform(self) -> Compose:
         """
-        Get the transform
+        Get transform
         """
 
         return self._transform
@@ -166,16 +144,24 @@ class FeatureExtractor:
     @property
     def output_shape(self) -> tuple:
         """
-        Get the output shape of the model
+        Get output shape of the model
         """
 
-        return self._get_output_shape()
+        return (self._out_shape,)
+
+    @property
+    def input_shape(self) -> tuple:
+        """
+        Get input shape of the model
+        """
+        return (self._in_shape, self._in_shape)
 
     def __call__(self, image):
         return self.extract(image)
 
     def __repr__(self):
         return f"FeatureExtractor(model={self._model_name}, \
+input_shape={self.input_shape}, \
 output_shape={self.output_shape})"
 
     def __str__(self):
