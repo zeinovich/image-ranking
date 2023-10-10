@@ -25,7 +25,7 @@ TEST_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons\
 
 FEATURE_EXTRACTOR_PATH = None
 RANKER_PATH = getenv("RANKER_PATH")
-# SCALER_PATH = getenv("SCALER_PATH")
+SCALER_PATH = getenv("SCALER_PATH")
 
 
 @pytest.fixture
@@ -40,9 +40,7 @@ def ranker():
 
 def test_load_image_from_json():
     # prepare image
-    url = "https://upload.wikimedia.org/wikipedia/commons\
-/thumb/b/b6/Image_created_with_a_mobile_phone.png\
-/330px-Image_created_with_a_mobile_phone.png"
+    url = TEST_IMAGE_URL
 
     img_file = urlopen(url)
     im_bytes = img_file.read()
@@ -59,9 +57,7 @@ def test_load_image_from_json():
 
 def test_get_prediction(extractor: FeatureExtractor, ranker: Ranker):
     # prepare image
-    url = "https://upload.wikimedia.org/wikipedia/commons\
-/thumb/b/b6/Image_created_with_a_mobile_phone.png\
-/330px-Image_created_with_a_mobile_phone.png"
+    url = TEST_IMAGE_URL
     img_file = urlopen(url)
     im_bytes = img_file.read()
     im_b64 = base64.b64encode(im_bytes).decode("utf8")

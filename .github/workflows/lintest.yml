@@ -23,3 +23,7 @@ jobs:
     - name: Analysing the code with flake8
       run: |
         flake8 --max-line-length=88 --ignore=F401 .
+    - name: Testing the code
+      run: |
+        cd backend
+        python -m pytest tests
