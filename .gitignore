@@ -1,15 +1,29 @@
-!db_example.env
-!data_folder.py
-*.parquet
+# ignore mlflow folder
 mlflow
+
+# ignore caches and checkpoints
 .ipynb_checkpoints
 .pyc
 __pycache__
-tmp
-ML-models
+
+# ignore environment but keep test env
 *.env
+!*.test.env
+
+# ignore data and models
+*.parquet
 *.pth
 *.pkl
 *.csv
+
+# keep test models and data
+!*-sample.*
+!*.test.pkl
+
+# ignore metadata and notebooks
 *.json
 *.ipynb
+
+# ignore k8s secrets and config maps
+*map.yaml
+*secret.yaml
